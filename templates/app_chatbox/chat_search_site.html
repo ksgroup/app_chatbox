@@ -1,0 +1,85 @@
+<!--#
+ @version 0.3 (auto-set)
+#-->
+<!-- table chat search -->
+
+[#if NOT_LOGGED#]
+[#if MOBILE!="1"#]
+<p>
+<#LANG_PLEASE_LOGIN#>
+</p>
+[#endif MOBILE#]
+[#else#]
+
+<form action="?" name="frmShoutBoxMsg" method="get" style="margin:0px" onSubmit='return false;'>
+<table width=100% border=0>
+    <tr>
+	<td align=center>
+	    <table border=0>
+	        <tr>
+			<td><#LANG_COMMAND#>:</td>
+		        <td><input type="text" name="message"></td>
+			<td><input type="submit" name="submit" value="<#LANG_SEND#>" onClick="return sendShoutMessage();"></td>
+	        </tr>
+	    </table>
+	</td>
+    </tr>
+</table>
+</form>
+[#endif#]
+<!-- results -->
+<style>
+@font-face{
+font-family:LiquidCrystal;
+src: url(/templates/app_chatbox/ciBSkBSG.ttf);
+}
+</style>
+<div id="chatContent" class="ui-widget-content">
+[#if TXT_DATA!=""#][#TXT_DATA#][#else#]<#LANG_LOADING#>...[#endif#]
+</div>
+<!-- / results -->
+
+<script language="javascript">
+
+var shoutTimer;
+
+ function updateChatContent() {
+  clearTimeout(shoutTimer);
+
+  var url="<#ROOTHTML#>popup/app_chatbox.html?";
+
+   url=url+'&limit=<#LIMIT#>&getdata=1[#if REVERSE="1"#]&reverse=1[#endif#]';
+   $.ajax({
+    url: url,
+    }).done(function(data) { 
+     if (data!='') {
+      $('#chatContent').html(data);
+     }
+    });
+
+  [#if (NOT_LOGGED!="1") || (MOBILE=="1")#]
+  shoutTimer=setTimeout("updateChatContent('', '');", 10000);
+  [#endif NOT_LOGGED#]
+ }
+
+ function sendShoutMessage() {
+  if (document.frmShoutBoxMsg.message.value == '') return false; 
+  var msg=URLencode(document.frmShoutBoxMsg.message.value);
+  document.frmShoutBoxMsg.message.value='';
+  var url="<#ROOTHTML#>popup/app_chatbox.html?";
+  url=url+'&limit=<#LIMIT#>&msg='+msg;
+  $.ajax({
+   url: url,
+   }).done(function(data) { 
+    if (data!='OK' && data!='') {
+     $('#chatContent').html(data);
+    }
+   });
+  return false;
+ }
+</script>
+
+
+<script language="javascript">
+ updateChatContent();
+</script>
